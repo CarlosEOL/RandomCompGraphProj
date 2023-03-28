@@ -1,2 +1,2 @@
 # RandomCompGraphProj
- Practice CG
+ CG Practice
