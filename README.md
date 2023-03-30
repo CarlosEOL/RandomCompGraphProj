@@ -1,3 +1,5 @@
+Doc Link: https://docs.google.com/document/d/1lHZTLDKgPruk2hhhiFIPMAxoAX8rVwz_VCP1FBk3iTI/edit?usp=sharing
+
 ## Deferred and Foward Lightning: 
 	
 Deferred Lightning is referenced to the lightning model that does not include tracking the lightning dir directly from each light source, it supports using only one pass for the entire texture material. It uses a screen-space rendering technique that usually is incompatible with transparency. The deferred lighting goes through G-Buffer that processes world normal, z-buffer, and color before applying the final combined image.
