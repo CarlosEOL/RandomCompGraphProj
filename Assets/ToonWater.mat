@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DiffuseHL
+  m_Name: ToonWater
   m_Shader: {fileID: 4800000, guid: 673cc92e418798e40bb625d9004798f2, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -86,7 +86,7 @@ Material:
     - _WaveDistance: 1.73
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.29622638, g: 0.30805477, b: 1, a: 1}
+    - _Color: {r: 0.23018867, g: 0.24309061, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []

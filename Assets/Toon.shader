@@ -6,15 +6,20 @@ Shader "Custom/Toon"
         _MainTex ("Albedo (RGB)", 2D) = "white" {}
         _BumpMap ("Bump Texture", 2D) = "bump" {}
         _RampTex ("Ramp Texture (RGB)", 2D) = "white" {}
-        _SplashTex ("Splash Texture (RGB)", 2D) = "white" {}
         _BumpAmount ("Bump Amount", Range(0,10)) = 1
-        _WaveDistance ("Wave Distance (M)", Range(0,10)) = 1
+        
+        _Strength ("Wave Strength", Range(0, 100)) = 1
+        _Speed ("Wave Speed", Range(0, 100)) = 1
+        _SplashTex ("Splash Texture (RGB)", 2D) = "white" {}
         
         _OutlineWidth ("Outline Width", Range(0.0, 10)) = 0.005
         _OutlineColor ("Outline Color", Color) = (0,0,0,1)
     }
     SubShader // Base Albedo
     {
+        Tags {"RenderType" = "Transparent"}
+        
+        Cull off
         CGPROGRAM
         // Physically based Standard lighting model, and enable shadows on all light types
         #pragma surface surf ToonRamp
@@ -41,7 +46,7 @@ Shader "Custom/Toon"
 
             float4 c;
             c.rgb = s.Albedo * _LightColor0.rgb * (ramp);
-            c.a = s.Alpha;
+            c.a = s.Alpha;D
             return c;
         }
 
@@ -59,16 +64,25 @@ Shader "Custom/Toon"
         }
         ENDCG
         
-        Pass // Vertex Editor
+        Pass // Vertex Editor - Waves
         {
+            Cull off // Cull Everyface
+            
             CGPROGRAM
             #pragma vertex vert
-            // make fog work
-            #pragma multi_compile_fog
+            #pragma fragment frag
 
-            #include "UnityCG.cginc"
+            float _Strength;
+            float _Speed;
+            float4 _Color;
+            sampler2D _MainTex;
+
+            struct Input
+            {
+                float2 uv_MainTex;
+            };
             
-            struct appdata
+            struct VertexInput
             {
                 float4 vertex : POSITION;
                 float2 uv : TEXCOORD0;
@@ -76,16 +90,18 @@ Shader "Custom/Toon"
 
             struct v2f
             {
-                float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
                 float4 vertex : SV_POSITION;
+                float2 uv : TEXCOORD0;
             };
             
 
-            v2f vert (appdata v)
+            v2f vert (VertexInput v)
             {
                 v2f o;
 
+                // THIS DOESN'T WORK BECAUSE _SinTime doesn't have "SINCESTARTUP".
+
+                /* 
                 float sinToSquare;
                 
                 if (_SinTime < 0)
@@ -103,11 +119,30 @@ Shader "Custom/Toon"
                 }
                 
                 v.vertex.x *= sinToSquare;
+
+                */
+
+                float4 worldPos = mul(unity_ObjectToWorld, v.vertex);
                 
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
+                float displacement = cos(worldPos.y) + cos(worldPos.x + (_Speed * _Time));
+
+                worldPos.y = worldPos.y + (displacement * _Strength);
+
+                o.vertex = mul(UNITY_MATRIX_VP, worldPos); //Now the displacement effect the vertex.
+                //o.vertex = UnityObjectToClipPos(v.vertex);
+                //UNITY_TRANSFER_FOG(o,o.vertex);
+                
                 return o;
             }
+
+            fixed4 frag (v2f i) : COLOR
+            {
+                fixed4 col = tex2D(_MainTex, i.uv) * _Color;
+                // just invert the colors
+                //col.rgb = 1 - col.rgb;
+                return col;
+            }
+            
             ENDCG
         }
         
@@ -138,21 +173,21 @@ Shader "Custom/Toon"
             float _OutlineWidth;
             float4 _OutlineColor;
 
-            v2f vert (appdata v)
-            {
-                v2f o;
-                o.pos = UnityObjectToClipPos(v.vertex);
+                v2f vert (appdata v)
+                {
+                    v2f o;
+                    o.pos = UnityObjectToClipPos(v.vertex);
 
-                float3 norm = normalize(mul ((float3x3)UNITY_MATRIX_IT_MV, v.normal));
-                float2 offset = TransformViewToProjection(norm.xy);
-                
-                o.pos.xy += offset * o.pos.z * _OutlineWidth;
-                o.color = _OutlineColor;
-                //o.uv = v.uv;
-                return o;
-            }
+                    float3 norm = normalize(mul((float3x3)UNITY_MATRIX_IT_MV, v.normal));
+                    float2 offset = TransformViewToProjection(norm.xy);
+                    
+                    o.pos.xy += offset * o.pos.z * _OutlineWidth;
+                    o.color = _OutlineColor;
+                    //o.uv = v.uv;
+                    return o;
+                }
 
-            //sampler2D _MainTex;
+                //sampler2D _MainTex;
 
             fixed4 frag (v2f i) : SV_Target
             {
@@ -161,8 +196,9 @@ Shader "Custom/Toon"
                 //col.rgb = 1 - col.rgb;
                 return i.color;
             }
+            
             ENDCG
+            }
         }
-    }
     FallBack "Diffuse"
 }

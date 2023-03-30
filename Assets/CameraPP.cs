@@ -2,18 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NewBehaviourScript : MonoBehaviour
+public class CameraPP : MonoBehaviour
 {
     [SerializeField] private int integerRange;
     
     
-    void OnRenderImage(RenderTexture source, RenderTexture
-        destination){
-        int width = source.width / integerRange;
+    void OnRenderImage(RenderTexture source, RenderTexture destination){
+        
+        // Set Post Process Resolution
+        // if the range is 1, then the resolution of the effect would be the camera resolution
+        // if the range < 1, then the final resolution would pixelize.
+            
+        int width = source.width / integerRange; 
         int height = source.height / integerRange;
+        
+        
+        
         RenderTextureFormat format = source.format;
         RenderTexture[] textures = new RenderTexture[16];
         RenderTexture currentDestination = textures[0] = RenderTexture.GetTemporary(width, height, 0, format);
+        
+        
         Graphics.Blit(source, currentDestination);
         RenderTexture currentSource = currentDestination;
         Graphics.Blit(currentSource, destination);
