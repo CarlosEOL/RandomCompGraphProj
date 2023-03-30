@@ -46,7 +46,7 @@ Shader "Custom/Toon"
 
             float4 c;
             c.rgb = s.Albedo * _LightColor0.rgb * (ramp);
-            c.a = s.Alpha;D
+            c.a = s.Alpha;
             return c;
         }
 
